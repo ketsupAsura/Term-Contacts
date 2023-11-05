@@ -1,13 +1,16 @@
+// ketsup@asura
 #include <iostream>
 #include <string>
 #include <vector>
 #include "Contact.h"
+
 
 enum ComparisonResult { 
     LESS,     // smaller value 
     GREATER,  // larger value
     EQUAL     // equal value
 };
+
 
 // used for sorting
 // the following 3 comparator functions is used to compare the Contact objects
@@ -27,19 +30,19 @@ bool compareContactByEmail(const Contact& contact1, const Contact& contact2) {
 // used for searching
 // the following 3 comparator functions is used to compare(if equal) the Contact object to the search of the user
 // in the contactList vector based on what filter the user selected to search in the contactList
-ComparisonResult searchContactByName(const Contact& contact, std::string& nameSearched) {
+ComparisonResult searchContactByName(const Contact& contact, const std::string& nameSearched) {
     if (contact.getName() < nameSearched) { return LESS; }
     else if (contact.getName() > nameSearched) { return GREATER; }
     else return EQUAL;
 }
 
-ComparisonResult searchContactByPhoneNumber(const Contact& contact, std::string& phoneNumberSearched) {
+ComparisonResult searchContactByPhoneNumber(const Contact& contact, const std::string& phoneNumberSearched) {
     if (contact.getPhoneNumber() < phoneNumberSearched) { return LESS; }
     else if (contact.getPhoneNumber() > phoneNumberSearched) { return GREATER; }
     else return EQUAL;
 }
 
-ComparisonResult searchContactByEmail(const Contact& contact, std::string& emailSearched) {
+ComparisonResult searchContactByEmail(const Contact& contact, const std::string& emailSearched) {
     if (contact.getEmail() < emailSearched) { return LESS; }
     else if (contact.getEmail() > emailSearched) { return GREATER; }
     else return EQUAL;
@@ -50,13 +53,31 @@ class ContactManager {
 private:
     std::vector<Contact> contactList;
 public:
+    /*
+    // we can also use typedef by the way
+    // used alliases for long function parameters like this function pointer
+    // by the way the types should be known/declared before putting it here as paremeter(you only need type)
+    // by the way here we declared a member function pointer to a new type called searchComparatorFunction
+    // the member function pointer will be based on the users selected filter
+    */
+
+    // so i finally understand it, the comment above is about method function pointer
+    // i only wanted to shorten the parameter in my funcions since i need to pass a function pointer
+    // but since the function pointer is not within/or not a metod of ContactManager class since
+    // I declared it outside of the class, we only need to make it as function pointer and not a method functioni pointer
+    // my mistake is that when making a userdefined type by using the "using" keyword, is that i only need
+    // to define the types and not the variable name, so what i did is to make another type called 
+    // searchComparatorFunction, that is a function pointer
+    using searchComparatorFunction = ComparisonResult (*)(const Contact&, const std::string&); 
+    using sortComparatorFunction = bool (*)(const Contact&, const Contact&);
+
     // In mergeSort I passed the vector since it needs to divide the vector 
     // into left and right temporary vectors (container for left and right vector),
     // during the recurssion, until there is only one element in the temporary vector, 
     // then the functions will be called in the stack to complete the call, 
     // this is where the merging and sorting of the temporary vectors back the original vector(contactList) will take place
-    void mergeSort(std::vector<Contact>& contactList_, bool (*comparatorFunction)(const Contact& contac1, const Contact& contact2));
-    void merge(std::vector<Contact>& leftArray, std::vector<Contact>& rightArray, std::vector<Contact>& contactList_, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2)); // helper method for mergeSort
+    void mergeSort(std::vector<Contact>& contactList_, sortComparatorFunction compare);
+    void merge(std::vector<Contact>& leftArray, std::vector<Contact>& rightArray, std::vector<Contact>& contactList_, sortComparatorFunction compare); // helper method for mergeSort
     
     // In quick sort I didn't pass the contactList since I don't need to create temporary vector containers,
     // since sorting happens in the original vector and the vector is a field of the class meaning the methods of the class have acces to it, 
@@ -64,10 +85,16 @@ public:
     // wherein the left side of the pivot are elements that is less than the pivot and 
     // on the right side of the pivot are elements that is greater than the pivot (this is done by the helper function named partition),
     // more details....
-    void quickSort(int start, int end, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2));
-    int partition(int start, int end, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2));
+    void quickSort(int start, int end, sortComparatorFunction compare);
+    int partition(int start, int end, sortComparatorFunction compare); // helper method for quicksort
 
-    void binarySearch(std::string& contactDetail, ComparisonResult (*searchComparatorFunction)(const Contact& contact, std::string& contactDetail));
+    // binary search is used to find a specific contact based on the users selected filter(name, phone number or email)
+    void binarySearch(const std::string& contactDetail, searchComparatorFunction compare);
+
+    // linear search is used when the user selected to input a keyword to find a contact
+    // this will display all the contacts if the search input of the user is a substring of any of the
+    // fields of the contact (name, phone number, email)
+    void linearSearch(const std::string& searchKeyword);
 
     void menu();
     void manageContactMenu();
@@ -81,7 +108,8 @@ public:
 };
 
 
-void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>& rightArray, std::vector<Contact>& contactList_, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2)) {
+
+void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>& rightArray, std::vector<Contact>& contactList_, sortComparatorFunction compare) {
     int leftSize = contactList_.size() / 2;
     int rightSize = contactList_.size() - leftSize;
 
@@ -90,7 +118,7 @@ void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>
     
 
     while (l < leftSize && r < rightSize) {
-        if (comparatorFunction(leftArray[l], rightArray[r])) {
+        if (compare(leftArray[l], rightArray[r])) {
             contactList_[i] = leftArray[l];
             i++;
             l++;
@@ -115,7 +143,7 @@ void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>
     }
 }
 
-void ContactManager::mergeSort(std::vector<Contact>& contactList_, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2)) {
+void ContactManager::mergeSort(std::vector<Contact>& contactList_, sortComparatorFunction compare) {
     int size = contactList_.size();
     if (size <= 1) return; // base case
     
@@ -135,13 +163,13 @@ void ContactManager::mergeSort(std::vector<Contact>& contactList_, bool (*compar
         }
     }
 
-    mergeSort(leftArray, comparatorFunction);
-    mergeSort(rightArray, comparatorFunction);
-    merge(leftArray, rightArray, contactList_, comparatorFunction);
+    mergeSort(leftArray, compare);
+    mergeSort(rightArray, compare);
+    merge(leftArray, rightArray, contactList_, compare);
 
 }
 
-int ContactManager::partition(int start, int end, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2)) {
+int ContactManager::partition(int start, int end, sortComparatorFunction compare) {
 
     // the pivot well be the last element of the vector
     Contact pivot = contactList[end];
@@ -150,7 +178,7 @@ int ContactManager::partition(int start, int end, bool (*comparatorFunction)(con
 
     for (int j = start; j <= end - 1; j++) {
 
-        if (comparatorFunction(contactList[j], pivot)) {
+        if (compare(contactList[j], pivot)) {
             i++;
              
             Contact temp = contactList[i];
@@ -167,22 +195,22 @@ int ContactManager::partition(int start, int end, bool (*comparatorFunction)(con
     return i;
 }
 
-void ContactManager::quickSort(int start, int end, bool (*comparatorFunction)(const Contact& contact1, const Contact& contact2)) {
+void ContactManager::quickSort(int start, int end, sortComparatorFunction compare) {
      
     if (end <= start) { return; } // base case
     
-    int pivot = partition(start, end, comparatorFunction);
+    int pivot = partition(start, end, compare);
 
     // left partition
-    quickSort(start, pivot - 1, comparatorFunction);
+    quickSort(start, pivot - 1, compare);
 
     // right partition
-    quickSort(pivot + 1, end, comparatorFunction);
+    quickSort(pivot + 1, end, compare);
 
 }
 
 
-void ContactManager::binarySearch(std::string& contactDetail, ComparisonResult (*searchComparatorFunction)(const Contact& contact, std::string& contactDetail)) {
+void ContactManager::binarySearch(const std::string& contactDetail, searchComparatorFunction compare) {
     int low = 0;
     int high = contactList.size() - 1;
 
@@ -190,7 +218,8 @@ void ContactManager::binarySearch(std::string& contactDetail, ComparisonResult (
         int middle = low + (high - low) / 2;
         Contact contact = contactList[middle];
 
-        ComparisonResult comparisonResult = searchComparatorFunction(contact, contactDetail);
+        // here we get the result from member function pointer that the user selected in the filter
+        ComparisonResult comparisonResult = compare(contact, contactDetail);
 
         if (comparisonResult == LESS) { low = middle + 1; } 
         else if ( comparisonResult == GREATER) { high = middle - 1; } 
@@ -221,6 +250,35 @@ void ContactManager::binarySearch(std::string& contactDetail, ComparisonResult (
         }
     }*/
 
+}
+
+void ContactManager::linearSearch(const std::string& searchKeyword) {
+    bool isSearchKeywordFound = false;
+
+    std::cout << "Search Results: \n\n";
+
+    // the find() method returns the position of the first occurence of 
+    // substring if it is found if not it returns std::string::npos as the return value
+    for (int i = 0; i < contactList.size(); i++)  {
+
+        // if the keyword searched by the user is find withind the 3 fields of the  
+        // Contact obj. (name, phone_number, email) then we display that Contact
+        if (contactList[i].name.find(searchKeyword) != std::string::npos ||
+            contactList[i].phone_number.find(searchKeyword) != std::string::npos ||
+            contactList[i].email.find(searchKeyword) != std::string::npos ) 
+        {
+            isSearchKeywordFound = true;
+            std::cout << "Name: " << contactList[i].name << "\n";
+            std::cout << "Phone Number: " << contactList[i].phone_number << "\n";
+            std::cout << "Email: " << contactList[i].email << "\n";
+            std::cout << "================================================\n\n";
+        }
+    }
+
+    // if the searched keyword is not found
+    if (!isSearchKeywordFound) {
+        std::cout << "No Results Found...\n\n";
+    }
 }
 
 void ContactManager::menu() {
@@ -506,6 +564,11 @@ void ContactManager::printContactList(std::string& filter) {
 
     system("cls");
     std::cout << "================ CONTACT LIST ==================\n\n";
+
+    if (contactList.empty()) {
+        std::cout << "\n\nYou have no contacts recorded...\n\n";
+    }
+
     for (int i = 0; i < contactList.size(); i++) {
         std::cout << "Name: " << contactList[i].name << "\n";
         std::cout << "Phone Number: " << contactList[i].phone_number << "\n";
@@ -526,11 +589,14 @@ void ContactManager::searchContactMenu() {
         std::cout << "[N] Search By Name\n";
         std::cout << "[P] Search By Phone Number\n";
         std::cout << "[E] Search By Email\n";
+        std::cout << "[K] Search By Keyword\n";
         std::cout << "[B] Back\n";
         std::cout << "Command: ";
         std::getline(std::cin, command);
 
-        if (command == "N" || command == "P" || command == "E") {
+        bool isCommand = command == "N" || command == "P" || command == "E" || command == "K"; 
+
+        if (isCommand) {
             searchContactList(command);
         } 
         else if (command == "B") {
@@ -552,11 +618,14 @@ void ContactManager::searchContactList(std::string& filter) {
     bool (*sortComparatorFunction)(const Contact& contact1, const Contact& contact2);
 
     // used for searching 
-    ComparisonResult (*searchComparatorFunction) (const Contact& contact, std::string& contactDetail);
+    ComparisonResult (*searchComparatorFunction) (const Contact& contact, const std::string& contactDetail);
 
 
     std::string searchPrompt;
-    if (filter == "N") { 
+    if (filter == "K") {
+        searchPrompt = "\n\nEnter keyword: ";    
+    }
+    else if (filter == "N") { 
         searchPrompt = "\n\nEnter Contact Name: ";
         sortComparatorFunction = compareContactByName;
         searchComparatorFunction = searchContactByName; 
@@ -572,16 +641,25 @@ void ContactManager::searchContactList(std::string& filter) {
         searchComparatorFunction = searchContactByEmail;
     }
 
-    quickSort(0, contactList.size() - 1, sortComparatorFunction);
 
+    // get the search input of the user
     std::string contactDetail;
     std::cout << searchPrompt;
     std::getline(std::cin, contactDetail);
 
     system("cls");
 
-    // search contact
-    binarySearch(contactDetail, searchComparatorFunction);
+    if (filter == "K") { 
+        linearSearch(contactDetail);
+    } 
+    else {
+        // sort contact list using qucksort
+        quickSort(0, contactList.size() - 1, sortComparatorFunction);
+
+        // search contact using binary search
+        binarySearch(contactDetail, searchComparatorFunction);
+
+    } 
 
     system("pause");
 
