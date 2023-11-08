@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "Contact.h"
 
 
@@ -16,35 +17,66 @@ enum ComparisonResult {
 // the following 3 comparator functions is used to compare the Contact objects
 // in the contactList vector based on the fileter the user selected to view the contactList
 bool compareContactByName(const Contact& contact1, const Contact& contact2) {
-    return contact1.getName() < contact2.getName();
+    std::string contactName1 = contact1.getName();
+    std::string contactName2 = contact2.getName();
+
+    // lowercase first the two contact name before comparing
+    std::transform(contactName1.begin(), contactName1.end(), contactName1.begin(), ::tolower);
+    std::transform(contactName2.begin(), contactName2.end(), contactName2.begin(), ::tolower);
+
+    return contactName1 < contactName2;
 }
 
 bool compareContactByPhoneNumber(const Contact& contact1, const Contact& contact2) {
-    return contact1.getPhoneNumber() < contact2.getPhoneNumber();
+    std::string contactPhoneNumber1 = contact1.getPhoneNumber();
+    std::string contactPhoneNumber2 = contact2.getPhoneNumber();
+
+    // lowercase first the two phone number before comparing
+    std::transform(contactPhoneNumber1.begin(), contactPhoneNumber1.end(), contactPhoneNumber1.begin(), ::tolower);
+    std::transform(contactPhoneNumber2.begin(), contactPhoneNumber2.end(), contactPhoneNumber2.begin(), ::tolower);
+    return contactPhoneNumber1 < contactPhoneNumber2;
 }
 
 bool compareContactByEmail(const Contact& contact1, const Contact& contact2) {
-    return contact1.getEmail() < contact2.getEmail();
+    std::string contactEmail1 = contact1.getEmail();
+    std::string contactEmail2 = contact2.getEmail();
+
+    // lowercase first the two phone number before comparing
+    std::transform(contactEmail1.begin(), contactEmail1.end(), contactEmail1.begin(), ::tolower);
+    std::transform(contactEmail2.begin(), contactEmail2.end(), contactEmail2.begin(), ::tolower);
+    return contactEmail1 < contactEmail2;
 }
 
 // used for searching
 // the following 3 comparator functions is used to compare(if equal) the Contact object to the search of the user
 // in the contactList vector based on what filter the user selected to search in the contactList
 ComparisonResult searchContactByName(const Contact& contact, const std::string& nameSearched) {
-    if (contact.getName() < nameSearched) { return LESS; }
-    else if (contact.getName() > nameSearched) { return GREATER; }
+    std::string contactName = contact.getName();
+    // make the contactName to lowercase
+    std::transform(contactName.begin(), contactName.end(), contactName.begin(), ::tolower);
+
+    if (contactName < nameSearched) { return LESS; }
+    else if (contactName > nameSearched) { return GREATER; }
     else return EQUAL;
 }
 
 ComparisonResult searchContactByPhoneNumber(const Contact& contact, const std::string& phoneNumberSearched) {
-    if (contact.getPhoneNumber() < phoneNumberSearched) { return LESS; }
-    else if (contact.getPhoneNumber() > phoneNumberSearched) { return GREATER; }
+    std::string contactPhoneNumber = contact.getPhoneNumber();
+    // make the contactPhoneNumber to lowercase
+    std::transform(contactPhoneNumber.begin(), contactPhoneNumber.end(), contactPhoneNumber.begin(), ::tolower);
+
+    if (contactPhoneNumber < phoneNumberSearched) { return LESS; }
+    else if (contactPhoneNumber > phoneNumberSearched) { return GREATER; }
     else return EQUAL;
 }
 
 ComparisonResult searchContactByEmail(const Contact& contact, const std::string& emailSearched) {
-    if (contact.getEmail() < emailSearched) { return LESS; }
-    else if (contact.getEmail() > emailSearched) { return GREATER; }
+    std::string contactEmail = contact.getEmail();
+    // make the contactEmail to lowercase
+    std::transform(contactEmail.begin(), contactEmail.end(), contactEmail.begin(), ::tolower);
+
+    if (contactEmail < emailSearched) { return LESS; }
+    else if (contactEmail > emailSearched) { return GREATER; }
     else return EQUAL;
 }
 
@@ -108,12 +140,13 @@ public:
 };
 
 
-
 void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>& rightArray, std::vector<Contact>& contactList_, sortComparatorFunction compare) {
     int leftSize = contactList_.size() / 2;
     int rightSize = contactList_.size() - leftSize;
 
-    // i for the original array, l for the leftArray, r for the rightArray
+    // i for the original array, 
+    // l for the leftArray, 
+    // r for the rightArray
     int i = 0, l = 0, r = 0; // indices
     
 
@@ -172,6 +205,7 @@ void ContactManager::mergeSort(std::vector<Contact>& contactList_, sortComparato
 int ContactManager::partition(int start, int end, sortComparatorFunction compare) {
 
     // the pivot well be the last element of the vector
+    // it can also be in the mid or the beginning element
     Contact pivot = contactList[end];
 
     int i = start - 1;
@@ -252,6 +286,7 @@ void ContactManager::binarySearch(const std::string& contactDetail, searchCompar
 
 }
 
+// linear search
 void ContactManager::linearSearch(const std::string& searchKeyword) {
     bool isSearchKeywordFound = false;
 
@@ -260,12 +295,21 @@ void ContactManager::linearSearch(const std::string& searchKeyword) {
     // the find() method returns the position of the first occurence of 
     // substring if it is found if not it returns std::string::npos as the return value
     for (int i = 0; i < contactList.size(); i++)  {
+        std::string contactName = contactList[i].name;
+        std::string contactPhoneNumber = contactList[i].phone_number;
+        std::string contactEmail = contactList[i].email;
+
+        // make the contact details to lowercase
+        // so that it will match the seacheKeyword regardless of the case
+        std::transform(contactName.begin(), contactName.end(), contactName.begin(), ::tolower);
+        std::transform(contactPhoneNumber.begin(), contactPhoneNumber.end(), contactPhoneNumber.begin(), ::tolower);
+        std::transform(contactEmail.begin(), contactEmail.end(), contactEmail.begin(), ::tolower);
 
         // if the keyword searched by the user is find withind the 3 fields of the  
         // Contact obj. (name, phone_number, email) then we display that Contact
-        if (contactList[i].name.find(searchKeyword) != std::string::npos ||
-            contactList[i].phone_number.find(searchKeyword) != std::string::npos ||
-            contactList[i].email.find(searchKeyword) != std::string::npos ) 
+        if (contactName.find(searchKeyword) != std::string::npos ||
+            contactPhoneNumber.find(searchKeyword) != std::string::npos ||
+            contactEmail.find(searchKeyword) != std::string::npos ) 
         {
             isSearchKeywordFound = true;
             std::cout << "Name: " << contactList[i].name << "\n";
@@ -295,6 +339,9 @@ void ContactManager::menu() {
         std::cout << "Command: ";
         std::getline(std::cin, command);
 
+        // convert the command to uppercase;
+        std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+
         if (command == "M") {
             manageContactMenu();
         } 
@@ -313,21 +360,6 @@ void ContactManager::menu() {
         }
     }
 
-    /*
-    switch (command) {
-        case "M":
-            manageContactMenu();
-            break;
-        case "V":
-            viewContactMenu();
-            break;
-        case "S":
-            searchContact();
-            break;
-        case "E": return;
-        default: std::cout << "Invalid Command!\n";
-    }
-    */
 }
 
 void ContactManager::manageContactMenu() {
@@ -343,6 +375,9 @@ void ContactManager::manageContactMenu() {
         std::cout << "[B] Back\n";
         std::cout << "Command: ";
         std::getline(std::cin, command);
+
+        // convert the command to uppercase
+        std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
         if (command == "A") {
             addContact();
@@ -362,15 +397,6 @@ void ContactManager::manageContactMenu() {
         }
     }
 
-    /*
-    switch (command) {
-        case "A": addContact(); break;
-        case "E": editContact(); break;
-        case "D": deleteContact(); break;
-        case "B": return;
-        default: std::cout << "Invalid Command!\n";
-    }
-    */
 }
 
 void ContactManager::addContact() {
@@ -414,7 +440,7 @@ void ContactManager::addContact() {
 }
 
 void ContactManager::editContact() {
-    std::string contactName;
+    std::string editContact;
     std::string editAnotherContact;
     bool contactEdited;
 
@@ -428,11 +454,18 @@ void ContactManager::editContact() {
 
         // get the contact name to be edited
         std::cout << "Enter contact name to edit: ";
-        std::getline(std::cin, contactName);
+        std::getline(std::cin, editContact);
+        
+        // make the input to lowercase
+        std::transform(editContact.begin(), editContact.end(), editContact.begin(), ::tolower);
 
         // find the contact the user wants to edit in the contactList
         for (int i = 0; i < contactList.size(); i++) {
-            if (contactList[i].name == contactName) {
+            std::string contactName = contactList[i].name;
+
+            //  make the contact name to lowercase
+            std::transform(contactName.begin(), contactName.end(), contactName.begin(), ::tolower);
+            if (editContact == contactName) {
 
                 // edit contact name
                 std::cout << "Enter new contact name: "; 
@@ -465,6 +498,7 @@ void ContactManager::editContact() {
         while (true) {
             std::cout << "\n\nDo you want to edit another contact[y/n]: ";
             std::getline(std::cin, editAnotherContact);
+            std::transform(editAnotherContact.begin(), editAnotherContact.end(), editAnotherContact.begin(), ::tolower);
 
             if (editAnotherContact == "y") { break; }
             else if (editAnotherContact == "n") { return; }
@@ -473,7 +507,7 @@ void ContactManager::editContact() {
 }
 
 void ContactManager::deleteContact() {
-    std::string contactName;
+    std::string deleteContact;
     std::string deleteAnotherContact;
     bool contactDeleted = false;
     while (true) {
@@ -483,11 +517,18 @@ void ContactManager::deleteContact() {
 
         // get the contact name to be deleted
         std::cout << "Enter contact name to delete: ";
-        std::getline(std::cin, contactName);
+        std::getline(std::cin, deleteContact);
+
+        // make the input to lowercase
+        std::transform(deleteContact.begin(), deleteContact.end(), deleteContact.begin(), ::tolower);
 
         // find the contact the user wants to delete in the contactList
         for (int i = 0; i < contactList.size(); i++) {
-            if (contactList[i].name == contactName) {
+            std::string contactName = contactList[i].name;
+
+            //  make the contact name to lowercase
+            std::transform(contactName.begin(), contactName.end(), contactName.begin(), ::tolower);
+            if (deleteContact == contactName) {
 
                 // delete the contact
                 contactList.erase(contactList.begin() + i);
@@ -507,6 +548,7 @@ void ContactManager::deleteContact() {
         while (true) {
             std::cout << "\n\nDo you want to delete another contact[y/n]: ";
             std::getline(std::cin, deleteAnotherContact);
+            std::transform(deleteAnotherContact.begin(), deleteAnotherContact.end(), deleteAnotherContact.begin(), ::tolower);
 
             if (deleteAnotherContact == "y") { break; }
             else if (deleteAnotherContact == "n") { return; }
@@ -526,6 +568,9 @@ void ContactManager::viewContactMenu() {
         std::cout << "[B] Back\n";
         std::cout << "Command: ";
         std::getline(std::cin, command);
+
+        // convert the command to uppercase
+        std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
         if (command == "N" || command == "P" || command == "E") {
             printContactList(command);
@@ -594,6 +639,9 @@ void ContactManager::searchContactMenu() {
         std::cout << "Command: ";
         std::getline(std::cin, command);
 
+        // convert the command to uppercase
+        std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+
         bool isCommand = command == "N" || command == "P" || command == "E" || command == "K"; 
 
         if (isCommand) {
@@ -646,6 +694,7 @@ void ContactManager::searchContactList(std::string& filter) {
     std::string contactDetail;
     std::cout << searchPrompt;
     std::getline(std::cin, contactDetail);
+    std::transform(contactDetail.begin(), contactDetail.end(), contactDetail.begin(), ::tolower);
 
     system("cls");
 
