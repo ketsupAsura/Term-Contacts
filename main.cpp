@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <regex>
+#include <fstream>
+#include <sstream>
 #include <windows.h> // windows api
 #include "Contact.h"
 
@@ -110,9 +112,10 @@ ComparisonResult searchContactByEmail(const Contact& contact, const std::string&
 class ContactManager {
 private:
     std::vector<Contact> contactList;  // stores the contacts
-    const int MIN_NAME_LENGTH = 2;     // minumum contact name length
-    const int MAX_NAME_LENGTH = 20;    // maximum contact name length
 public:
+
+    void readContactsFromFile();
+    void writeContactsToFile();
     /*
     // we can also use typedef by the way
     // used alliases for long function parameters like this function pointer
@@ -174,6 +177,40 @@ public:
 
 };
 
+// reads the contacts from the data file
+void ContactManager::readContactsFromFile() {
+    std::ifstream fhand("data/contacts.csv");
+
+    std::string line; // container for every line in the csv file
+    std::string name, phone_number, email; // container for every fields of the contact obj
+    while (std::getline(fhand, line)) {
+        std::istringstream contact(line); // break each lines into tokens
+
+        std::getline(contact, name, ',');           // the first token is the name
+        std::getline(contact, phone_number, ',');   // the second token is the phone number
+        std::getline(contact, email);               // the third token is the email
+        
+        // put the contact into the list
+        contactList.emplace_back(name, phone_number, email);
+    }
+
+    fhand.close(); // close the file
+}
+
+// overwrite all the old contents of the file
+// and put the new contacts in the data file
+void ContactManager::writeContactsToFile() {
+    std::ofstream fhand("data/contacts.csv");
+
+    std::string line;
+    for (const auto& contact : contactList) {
+        line = contact.name + "," + contact.phone_number + "," + contact.email + "\n";
+        fhand << line;
+    }
+
+    fhand.close(); // close the file
+}
+    
 
 void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>& rightArray, std::vector<Contact>& contactList_, sortComparatorFunction compare) {
     int leftSize = contactList_.size() / 2;
@@ -406,10 +443,14 @@ bool ContactManager::isValidName(const std::string& name) {
     return true;
 }
 
+// this is the starting point of the program 
+// the startmenu
 void ContactManager::menu() {
-    std::string command;
+    // firstly read all the contacts in the file
+    // so that the use can interact with it
+    readContactsFromFile();
 
-
+    std::string command; // container for the user selected option
     while (true) {
         system("cls");
         std::cout << "Contact Manager System Menu\n";
@@ -433,6 +474,10 @@ void ContactManager::menu() {
             searchContactMenu();
         } 
         else if (command == "E") {
+            // once the user choose to exists the program
+            // write all the changes that the user made 
+            // in the data file ( this overwrite the old data and write updated one)
+            writeContactsToFile();
             return;
         } 
         else {
@@ -444,6 +489,7 @@ void ContactManager::menu() {
 }
 
 void ContactManager::manageContactMenu() {
+
     std::string command;
 
     while (true) {
