@@ -3,7 +3,33 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <regex>
+#include <windows.h> // windows api
 #include "Contact.h"
+
+
+// for manipulation in clearing certain lines in the terminal
+void clearLines(int startLine, int numLines) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Set the cursor position to the start of the specified line
+    COORD coord;
+    coord.X = 0; // in terminal the x->0 is the upper right left corner 
+    coord.Y = startLine;
+    SetConsoleCursorPosition(hConsole, coord);
+
+    // Fill the specified number of lines with spaces
+    for (int i = 0; i < numLines; ++i) {
+        DWORD written;
+        // i just pass for 200 columns, so if the input exceeded it will not be clear (based on my laptop screen)
+        // i mean its not actually cleared i just overwrite the text in that specific line with spaces
+        FillConsoleOutputCharacter(hConsole, ' ', 200, coord, &written);  
+
+        // Reset attributes (make the console colors back to default)
+        FillConsoleOutputAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE, 200, coord, &written);  
+        coord.Y++; // increment the line to clear/overwrite the next line
+    }
+}
 
 
 enum ComparisonResult { 
@@ -83,7 +109,9 @@ ComparisonResult searchContactByEmail(const Contact& contact, const std::string&
 
 class ContactManager {
 private:
-    std::vector<Contact> contactList;
+    std::vector<Contact> contactList;  // stores the contacts
+    const int MIN_NAME_LENGTH = 2;     // minumum contact name length
+    const int MAX_NAME_LENGTH = 20;    // maximum contact name length
 public:
     /*
     // we can also use typedef by the way
@@ -128,6 +156,12 @@ public:
     // fields of the contact (name, phone number, email)
     void linearSearch(const std::string& searchKeyword);
 
+    // functions that checks input from the user
+    bool isValidPhoneNumber(const std::string& phoneNumber);
+    bool isValidEmail(const std::string& email);
+    bool isValidName(const std::string& name);
+
+    // functions that manages the menus and the options inside it
     void menu();
     void manageContactMenu();
     void addContact();
@@ -137,6 +171,7 @@ public:
     void printContactList(std::string& sortBy);
     void searchContactMenu();
     void searchContactList(std::string& filter);
+
 };
 
 
@@ -149,7 +184,8 @@ void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>
     // r for the rightArray
     int i = 0, l = 0, r = 0; // indices
     
-
+    // as long as there is a values in the left and right sub arrays we compare those values 
+    // and put it in right order in the original list
     while (l < leftSize && r < rightSize) {
         if (compare(leftArray[l], rightArray[r])) {
             contactList_[i] = leftArray[l];
@@ -163,12 +199,14 @@ void ContactManager::merge(std::vector<Contact>& leftArray, std::vector<Contact>
         }
     }
 
+    // put the remaining values of the left array
     while (l < leftSize) {
         contactList_[i] = leftArray[l];
         i++;
         l++;
     }
 
+    // put the remaining values of the right array
     while (r < rightSize) {
         contactList_[i] = rightArray[r];
         i++;
@@ -245,6 +283,7 @@ void ContactManager::quickSort(int start, int end, sortComparatorFunction compar
 
 
 void ContactManager::binarySearch(const std::string& contactDetail, searchComparatorFunction compare) {
+    system("cls");
     int low = 0;
     int high = contactList.size() - 1;
 
@@ -288,6 +327,7 @@ void ContactManager::binarySearch(const std::string& contactDetail, searchCompar
 
 // linear search
 void ContactManager::linearSearch(const std::string& searchKeyword) {
+    system("cls");
     bool isSearchKeywordFound = false;
 
     std::cout << "Search Results: \n\n";
@@ -325,12 +365,53 @@ void ContactManager::linearSearch(const std::string& searchKeyword) {
     }
 }
 
+// check if the input phone number is valid
+bool ContactManager::isValidPhoneNumber(const std::string& phoneNumber) {
+    // regex pattern for some phone number patterns in the philippines
+    // pipe | for alternation, or you can think of it as or
+    std::regex phoneNumberPattern("^(02\\d{7}|\\d{3}\\d{7}|\\d{4}\\d{6,7})$");
+
+    if (!std::regex_match(phoneNumber, phoneNumberPattern)) {
+        std::cout << "\n\nPlease enter a valid phone number...\n";
+        system("pause");
+        return false;
+    }
+    return true;
+}
+
+bool ContactManager::isValidEmail(const std::string& email) {
+    // regex pattern for simple/basic email validation string
+    std::regex emailPattern("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+
+    // Use std::regex_match to check if the email matches the emailPattern 
+    if (!std::regex_match(email, emailPattern)) {
+        std::cout << "\n\nPlease enter a valid email...\n"; 
+        system("pause");
+        return false;
+    }
+    return true;
+}
+
+bool ContactManager::isValidName(const std::string& name) {
+    // name should only containns letters and spaces
+    // minimum length of name is 3 and max is 20
+    std::regex namePattern("^[a-zA-Z ]{3,20}$");
+
+    if (!std::regex_match(name, namePattern)) {
+        std::cout << "\n\nName should only contain letters and spaces!\n";
+        system("pause");
+        return false;
+    }
+
+    return true;
+}
+
 void ContactManager::menu() {
     std::string command;
 
+
     while (true) {
         system("cls");
-
         std::cout << "Contact Manager System Menu\n";
         std::cout << "[M] Manage Contact\n";
         std::cout << "[V] View Contact\n";
@@ -367,12 +448,12 @@ void ContactManager::manageContactMenu() {
 
     while (true) {
         system("cls");
-
-        std::cout << "Manage Contacts\n";
+        std::cout << "Manage Contacts Menu\n";
         std::cout << "[A] Add Contact\n";
         std::cout << "[E] Edit Contact\n";
         std::cout << "[D] Delete Contact\n";
         std::cout << "[B] Back\n";
+
         std::cout << "Command: ";
         std::getline(std::cin, command);
 
@@ -408,33 +489,54 @@ void ContactManager::addContact() {
     while (true) {
         system("cls");
 
-        std::cout << "Add Contact\n";
+        std::cout << "Add Contact\n\n";
         
-        // get contact name
-        std::cout << "Enter contact name: "; 
-        std::getline(std::cin, name);
+        // get a valid contact name
+        while (true) {
 
-        // get contact phone number
-        std::cout << "Enter contact phone number: ";
-        std::getline(std::cin, phone_number);
+            std::cout << "Enter contact name: "; 
+            std::getline(std::cin, name);
+            
+            if(isValidName(name)) { break; }
+            clearLines(2, 7);
+        }
+
+        // get a valid contact phone number
+        while (true) {
+
+            std::cout << "Enter contact phone number: ";
+            std::getline(std::cin, phone_number);
+
+            if(isValidPhoneNumber(phone_number)) { break; }
+            clearLines(3, 8);
+        }
         
-        // get contact email
-        std::cout << "Enter contact email: ";
-        std::getline(std::cin, email);
+        // get a valid contact email
+        while (true) {
+
+            std::cout << "Enter contact email: ";
+            std::getline(std::cin, email);
+
+            if(isValidEmail(email)) { break; }
+            clearLines(4, 9);
+        }
 
         // create a contact obj
         Contact contact = Contact(name, phone_number, email);
 
         // add the contact obj to the contactList
-        contactList.push_back(contact);
+        // i use emplace_back as its much more efficient when adding dynamic objects
+        contactList.emplace_back(contact);
 
         // checks if the user wants to add more contacts
         while (true) {
             std::cout << "\n\nDo you want to add more contact[y/n]: ";
             std::getline(std::cin, addMoreContact);
+            std::transform(addMoreContact.begin(), addMoreContact.end(), addMoreContact.begin(), ::tolower);
 
             if (addMoreContact == "y") { break; }
             else if (addMoreContact == "n") { return; }
+            clearLines(5, 8);
         }
     }
 }
@@ -450,7 +552,7 @@ void ContactManager::editContact() {
     while (true) {
         system("cls");
 
-        std::cout << "Edit Contact\n";
+        std::cout << "Edit Contact\n\n";
 
         // get the contact name to be edited
         std::cout << "Enter contact name to edit: ";
@@ -468,18 +570,33 @@ void ContactManager::editContact() {
             if (editContact == contactName) {
 
                 // edit contact name
-                std::cout << "Enter new contact name: "; 
-                std::getline(std::cin, name);
+                while (true) {
+                    std::cout << "Enter new contact name: "; 
+                    std::getline(std::cin, name);
+
+                    if (isValidName(name)) { break; }
+                    clearLines(3, 8);
+                }
                 contactList[i].name = name;
 
                 // edit contact phone number
-                std::cout << "Enter new contact phone number: ";
-                std::getline(std::cin, phone_number);
+                while (true) {
+                    std::cout << "Enter new contact phone number: ";
+                    std::getline(std::cin, phone_number);
+
+                    if (isValidPhoneNumber(phone_number)) { break; }
+                    clearLines(4, 9);
+                }
                 contactList[i].phone_number = phone_number;
                 
                 // edit contact email
-                std::cout << "Enter new contact email: ";
-                std::getline(std::cin, email);
+                while (true) {
+                    std::cout << "Enter new contact email: ";
+                    std::getline(std::cin, email);
+
+                    if (isValidEmail(email)) { break; }
+                    clearLines(5, 10);
+                }
                 contactList[i].email = email;
 
                 contactEdited = true;
@@ -488,20 +605,21 @@ void ContactManager::editContact() {
         }
 
         if (contactEdited) {
-            std::cout << "Contact Edited Successfully!\n";
+            std::cout << "\n\nContact Edited Successfully!\n";
             contactEdited = false;
         } else {
-            std::cout << "Contact Not Found!\n";
+            std::cout << "\n\n\n\nContact Not Found!\n";
         }
 
         // ask the user if they want to edit another contact
         while (true) {
-            std::cout << "\n\nDo you want to edit another contact[y/n]: ";
+            std::cout << "Do you want to edit another contact[y/n]: ";
             std::getline(std::cin, editAnotherContact);
             std::transform(editAnotherContact.begin(), editAnotherContact.end(), editAnotherContact.begin(), ::tolower);
 
             if (editAnotherContact == "y") { break; }
             else if (editAnotherContact == "n") { return; }
+            clearLines(8, 9);
         }
     }
 }
@@ -513,7 +631,7 @@ void ContactManager::deleteContact() {
     while (true) {
         system("cls");
 
-        std::cout << "Delete Contact\n";
+        std::cout << "Delete Contact\n\n";
 
         // get the contact name to be deleted
         std::cout << "Enter contact name to delete: ";
@@ -538,20 +656,21 @@ void ContactManager::deleteContact() {
         }
 
         if (contactDeleted) {
-            std::cout << "Contact Deleted Successfully!\n";
+            std::cout << "\n\nContact Deleted Successfully!\n";
             contactDeleted = false;
         } else {
-            std::cout << "Contact Not Found!\n";
+            std::cout << "\n\nContact Not Found!\n";
         }
 
         // ask the user if they want to edit another contact
         while (true) {
-            std::cout << "\n\nDo you want to delete another contact[y/n]: ";
+            std::cout << "Do you want to delete another contact[y/n]: ";
             std::getline(std::cin, deleteAnotherContact);
             std::transform(deleteAnotherContact.begin(), deleteAnotherContact.end(), deleteAnotherContact.begin(), ::tolower);
 
             if (deleteAnotherContact == "y") { break; }
             else if (deleteAnotherContact == "n") { return; }
+            clearLines(6, 7);
         }
     }
 }
@@ -561,7 +680,7 @@ void ContactManager::viewContactMenu() {
     while (true) {
         system("cls");
 
-        std::cout << "View Contacts\n";
+        std::cout << "View Contacts Menu\n";
         std::cout << "[N] View By Name\n";
         std::cout << "[P] View By Phone Number\n";
         std::cout << "[E] View By Email\n";
@@ -630,7 +749,7 @@ void ContactManager::searchContactMenu() {
     while (true) {
         system("cls");
 
-        std::cout << "Search Contact \n";
+        std::cout << "Search Contacts Menu \n";
         std::cout << "[N] Search By Name\n";
         std::cout << "[P] Search By Phone Number\n";
         std::cout << "[E] Search By Email\n";
@@ -659,6 +778,7 @@ void ContactManager::searchContactMenu() {
 
 
 void ContactManager::searchContactList(std::string& filter) {
+    system("cls");
     // function pointer will point to a comapartor function
     // based on what filter the user selected to search the contactList
    
@@ -671,19 +791,23 @@ void ContactManager::searchContactList(std::string& filter) {
 
     std::string searchPrompt;
     if (filter == "K") {
+        std::cout << "Search By keyword";
         searchPrompt = "\n\nEnter keyword: ";    
     }
     else if (filter == "N") { 
+        std::cout << "Search By Name";
         searchPrompt = "\n\nEnter Contact Name: ";
         sortComparatorFunction = compareContactByName;
         searchComparatorFunction = searchContactByName; 
     }
     else if (filter == "P") { 
+        std::cout << "Search By Phone Number";
         searchPrompt = "\n\nEnter Contact Phone Number: ";
         sortComparatorFunction = compareContactByPhoneNumber;
         searchComparatorFunction = searchContactByPhoneNumber;
     }
     else if (filter == "E") { 
+        std::cout << "Search By Email";
         searchPrompt = "\n\nEnter Contact Email: ";
         sortComparatorFunction = compareContactByEmail;
         searchComparatorFunction = searchContactByEmail;
@@ -696,7 +820,6 @@ void ContactManager::searchContactList(std::string& filter) {
     std::getline(std::cin, contactDetail);
     std::transform(contactDetail.begin(), contactDetail.end(), contactDetail.begin(), ::tolower);
 
-    system("cls");
 
     if (filter == "K") { 
         linearSearch(contactDetail);
