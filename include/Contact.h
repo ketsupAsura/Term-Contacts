@@ -1,3 +1,4 @@
+// ketsup@asura
 #ifndef CONTACT_H
 #define CONTACT_H
 #include <iostream>
@@ -13,6 +14,7 @@ private:
 
 public: 
     Contact(std::string name_, std::string phone_number_, std::string email_);
+    Contact();
 
     std::string getName() const;
     std::string getPhoneNumber() const;
