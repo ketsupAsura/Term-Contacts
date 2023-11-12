@@ -3,14 +3,14 @@
 " A contact manager that runs on terminal of your computer "
 
 ### Instructions To Run The Program:
-Make sure to download the Term Contacts folder before proceeding
+Make sure to download the program folder before proceeding
 
 ### Building 
 
 Compiling: (this assumes that you have mingw as your c++ compiler):
 1. First please open you terminal (cmd, powershell, etc.), 
    And make sure you are at the directory where the program folder is located, 
-   i.e in the Term Contacts folder that you downloaded. 
+   i.e in the folder that you downloaded. 
    You can check the directory you are in using the command: pwd
 2. To move to a directory you can use the command: cd [programDirectory]
 3. Compile the files into object using:
