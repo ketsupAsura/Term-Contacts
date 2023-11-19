@@ -83,8 +83,8 @@ ComparisonResult searchContactByName(const Contact& contact, const std::string& 
     // make the contactName to lowercase
     std::transform(contactName.begin(), contactName.end(), contactName.begin(), ::tolower);
 
-    if (contactName < nameSearched) { return LESS; }
-    else if (contactName > nameSearched) { return GREATER; }
+    if (nameSearched < contactName) { return LESS; }
+    else if (nameSearched > contactName) { return GREATER; }
     else return EQUAL;
 }
 
@@ -93,8 +93,8 @@ ComparisonResult searchContactByPhoneNumber(const Contact& contact, const std::s
     // make the contactPhoneNumber to lowercase
     std::transform(contactPhoneNumber.begin(), contactPhoneNumber.end(), contactPhoneNumber.begin(), ::tolower);
 
-    if (contactPhoneNumber < phoneNumberSearched) { return LESS; }
-    else if (contactPhoneNumber > phoneNumberSearched) { return GREATER; }
+    if (phoneNumberSearched < contactPhoneNumber) { return LESS; }
+    else if (phoneNumberSearched > contactPhoneNumber) { return GREATER; }
     else return EQUAL;
 }
 
@@ -103,8 +103,8 @@ ComparisonResult searchContactByEmail(const Contact& contact, const std::string&
     // make the contactEmail to lowercase
     std::transform(contactEmail.begin(), contactEmail.end(), contactEmail.begin(), ::tolower);
 
-    if (contactEmail < emailSearched) { return LESS; }
-    else if (contactEmail > emailSearched) { return GREATER; }
+    if (emailSearched < contactEmail) { return LESS; }
+    else if (emailSearched > contactEmail) { return GREATER; }
     else return EQUAL;
 }
 
@@ -270,13 +270,13 @@ int ContactManager::partition(int start, int end, sortComparatorFunction compare
     int pivot_pos = start; // kept track of the index of the pivot
 
     // compare all the elements except to the pivot except itself
-    for (int j = start; j <= end - 1; j++) {
+    for (int i = start; i <= end - 1; i++) {
 
-        if (compare(contactList[j], pivot)) {
+        if (compare(contactList[i], pivot)) {
             // swap the smaller elements to the left and bigger elements on the right
             Contact temp = contactList[pivot_pos];
-            contactList[pivot_pos] = contactList[j];
-            contactList[j] = temp;
+            contactList[pivot_pos] = contactList[i];
+            contactList[i] = temp;
             pivot_pos++; // increment the place of the pivot
         }
     }
@@ -305,18 +305,26 @@ void ContactManager::quickSort(int start, int end, sortComparatorFunction compar
 
 void ContactManager::binarySearch(const std::string& contactDetail, searchComparatorFunction compare) {
     system("cls");
-    int low = 0;
-    int high = contactList.size() - 1;
+    int start = 0;
+    int end = contactList.size() - 1;
 
-    while (low <= high) {
-        int middle = low + (high - low) / 2;
-        Contact contact = contactList[middle];
+    while (start <= end) {
+        int mid = start + (end - start) / 2;
+        Contact contact = contactList[mid];
 
         // here we get the result from member function pointer that the user selected in the filter
         ComparisonResult comparisonResult = compare(contact, contactDetail);
 
-        if (comparisonResult == LESS) { low = middle + 1; } 
-        else if ( comparisonResult == GREATER) { high = middle - 1; } 
+        if (comparisonResult == LESS) { 
+            // if the searched value is less than the mid value (discard the right part of the array)
+            // then continue to search on the left side of the array 
+            end = mid - 1;
+        } 
+        else if ( comparisonResult == GREATER) {
+            // if the searched value is greater than the mid value (discard the left part of the array) 
+            // then continue to search on the right side of the array
+            start = mid + 1;
+        } 
         else if (comparisonResult = EQUAL) {
             std::cout << "Contact Found!\n\n";
             std::cout << "Name: " << contact.name << "\n";
@@ -325,6 +333,8 @@ void ContactManager::binarySearch(const std::string& contactDetail, searchCompar
             return; // target found
         }
     }
+
+    // target not found
     std::cout << "Contact Not Found!\n\n"; 
 }
 
