@@ -4,7 +4,7 @@ set(SOURCES
     modules/contact.cpp
     modules/contact_manager.cpp
     modules/file_io.cpp
-    modules/ui.cpp
+    modules/unicode_ui.cpp
 )
 
 add_executable(termContacts main.cpp ${SOURCES})
