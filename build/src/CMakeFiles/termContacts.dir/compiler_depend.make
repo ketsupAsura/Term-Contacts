@@ -415,7 +415,7 @@ src/CMakeFiles/termContacts.dir/main.cpp.obj: C:/Users/Acer/C++\ Programs/Term\ 
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wow64apiset.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wtypes.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wtypesbase.h \
-  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact.h \
+  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/Contact.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact_manager.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/file_io.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/unicode_ui.h
@@ -524,7 +524,7 @@ src/CMakeFiles/termContacts.dir/modules/contact.cpp.obj: C:/Users/Acer/C++\ Prog
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/sys/types.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/vadefs.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wchar.h \
-  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact.h
+  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/Contact.h
 
 src/CMakeFiles/termContacts.dir/modules/contact_manager.cpp.obj: C:/Users/Acer/C++\ Programs/Term\ Contacts/src/modules/contact_manager.cpp \
   C:/Program\ Files/MinGW/lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed/limits.h \
@@ -936,7 +936,7 @@ src/CMakeFiles/termContacts.dir/modules/contact_manager.cpp.obj: C:/Users/Acer/C
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wow64apiset.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wtypes.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wtypesbase.h \
-  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact.h \
+  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/Contact.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact_manager.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/unicode_ui.h
 
@@ -1079,7 +1079,7 @@ src/CMakeFiles/termContacts.dir/modules/file_io.cpp.obj: C:/Users/Acer/C++\ Prog
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/vadefs.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wchar.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wctype.h \
-  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact.h \
+  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/Contact.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/file_io.h
 
 src/CMakeFiles/termContacts.dir/modules/unicode_ui.cpp.obj: C:/Users/Acer/C++\ Programs/Term\ Contacts/src/modules/unicode_ui.cpp \
@@ -1453,7 +1453,7 @@ src/CMakeFiles/termContacts.dir/modules/unicode_ui.cpp.obj: C:/Users/Acer/C++\ P
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wow64apiset.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wtypes.h \
   C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wtypesbase.h \
-  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact.h \
+  C:/Users/Acer/C++\ Programs/Term\ Contacts/include/Contact.h \
   C:/Users/Acer/C++\ Programs/Term\ Contacts/include/unicode_ui.h
 
 
@@ -2287,7 +2287,7 @@ C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wnnc.h:
 
 C:/Program\ Files/MinGW/x86_64-w64-mingw32/include/wow64apiset.h:
 
-C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact.h:
+C:/Users/Acer/C++\ Programs/Term\ Contacts/include/Contact.h:
 
 C:/Users/Acer/C++\ Programs/Term\ Contacts/include/contact_manager.h:
 
