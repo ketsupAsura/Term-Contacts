@@ -1,0 +1,27 @@
+UserInterface -> ui.h
+-> will just contains methods basically what it does is just display prompts
+
+FileIO -> file_io.h, need contact.h
+- load data, returns a list
+- save data, returns a list
+
+Contact -> contact.h
+Attr:
+    name
+    phone number
+    email
+Methods: getters and setters
+
+ContactManager -> contact_manager.h, need file_io.h, contact.h, ui.h
+Attr: Contacs -> List of Contacts (loaded from a csv file)
+Methods:
+    addContact
+    editContact
+    deleteContact
+    viewContact(by name, by email, by phone_number)
+    searchContact(by name, by email, by phone_number, by keyword)
+
+
+main file
+- the main menu from ui.h
+- application loop
