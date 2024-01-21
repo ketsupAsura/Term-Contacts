@@ -1,3 +1,0 @@
-C:\Users\Acer\scoop\apps\cmake\3.27.3\bin\cmake.exe -E rm -f CMakeFiles\termContacts.dir/objects.a
-C:\PROGRA~1\MinGW\bin\ar.exe qc CMakeFiles\termContacts.dir/objects.a @CMakeFiles\termContacts.dir\objects1.rsp
-C:\PROGRA~1\MinGW\bin\C__~1.EXE -Wl,--whole-archive CMakeFiles\termContacts.dir/objects.a -Wl,--no-whole-archive -o "C:\Users\Acer\C++ Programs\Term Contacts\bin\termContacts.exe" -Wl,--out-implib,"C:\Users\Acer\C++ Programs\Term Contacts\bin\libtermContacts.dll.a" -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\termContacts.dir\linkLibs.rsp

@@ -1,5 +1,0 @@
-C:/Users/Acer/C++ Programs/Term Contacts/build/CMakeFiles/edit_cache.dir
-C:/Users/Acer/C++ Programs/Term Contacts/build/CMakeFiles/rebuild_cache.dir
-C:/Users/Acer/C++ Programs/Term Contacts/build/src/CMakeFiles/termContacts.dir
-C:/Users/Acer/C++ Programs/Term Contacts/build/src/CMakeFiles/edit_cache.dir
-C:/Users/Acer/C++ Programs/Term Contacts/build/src/CMakeFiles/rebuild_cache.dir
