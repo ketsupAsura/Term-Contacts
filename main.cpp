@@ -1,15 +1,3 @@
-/*
- * Project: Term Contacts
- * MP4, MP5 and MP6: Merge Sort, Quick Sort, Linear Search and Binary Search
- * Class: BSCpE - 2A
- * Members:
- *     Alagaban, Matt Rohan
- *     Belga, Paul Owen
- *     Tandog, Gian
- *     Mostaza, Hoecsht 
- *     Beralde, Robert
- */
-
 // ketsup@asura
 #include <iostream>
 #include <string>
@@ -71,6 +59,9 @@ bool compareContactByPhoneNumber(const Contact& contact1, const Contact& contact
     std::string contactPhoneNumber1 = contact1.getPhoneNumber();
     std::string contactPhoneNumber2 = contact2.getPhoneNumber();
 
+    // lowercase first the two phone number before comparing
+    std::transform(contactPhoneNumber1.begin(), contactPhoneNumber1.end(), contactPhoneNumber1.begin(), ::tolower);
+    std::transform(contactPhoneNumber2.begin(), contactPhoneNumber2.end(), contactPhoneNumber2.begin(), ::tolower);
     return contactPhoneNumber1 < contactPhoneNumber2;
 }
 
@@ -78,7 +69,7 @@ bool compareContactByEmail(const Contact& contact1, const Contact& contact2) {
     std::string contactEmail1 = contact1.getEmail();
     std::string contactEmail2 = contact2.getEmail();
 
-    // lowercase first the two email before comparing
+    // lowercase first the two phone number before comparing
     std::transform(contactEmail1.begin(), contactEmail1.end(), contactEmail1.begin(), ::tolower);
     std::transform(contactEmail2.begin(), contactEmail2.end(), contactEmail2.begin(), ::tolower);
     return contactEmail1 < contactEmail2;
@@ -89,7 +80,6 @@ bool compareContactByEmail(const Contact& contact1, const Contact& contact2) {
 // in the contactList vector based on what filter the user selected to search in the contactList
 ComparisonResult searchContactByName(const Contact& contact, const std::string& nameSearched) {
     std::string contactName = contact.getName();
-
     // make the contactName to lowercase
     std::transform(contactName.begin(), contactName.end(), contactName.begin(), ::tolower);
 
@@ -100,6 +90,8 @@ ComparisonResult searchContactByName(const Contact& contact, const std::string& 
 
 ComparisonResult searchContactByPhoneNumber(const Contact& contact, const std::string& phoneNumberSearched) {
     std::string contactPhoneNumber = contact.getPhoneNumber();
+    // make the contactPhoneNumber to lowercase
+    std::transform(contactPhoneNumber.begin(), contactPhoneNumber.end(), contactPhoneNumber.begin(), ::tolower);
 
     if (phoneNumberSearched < contactPhoneNumber) { return LESS; }
     else if (phoneNumberSearched > contactPhoneNumber) { return GREATER; }
@@ -108,7 +100,6 @@ ComparisonResult searchContactByPhoneNumber(const Contact& contact, const std::s
 
 ComparisonResult searchContactByEmail(const Contact& contact, const std::string& emailSearched) {
     std::string contactEmail = contact.getEmail();
-
     // make the contactEmail to lowercase
     std::transform(contactEmail.begin(), contactEmail.end(), contactEmail.begin(), ::tolower);
 
@@ -182,7 +173,7 @@ public:
 
 // reads the contacts from the data file
 void ContactManager::readContactsFromFile() {
-    std::ifstream fhand("../data/contacts.csv");
+    std::ifstream fhand("data/contacts.csv");
 
     std::string line; // container for every line in the csv file
     std::string name, phone_number, email; // container for every fields of the contact obj
@@ -203,7 +194,7 @@ void ContactManager::readContactsFromFile() {
 // overwrite all the old contents of the file
 // and put the new contacts in the data file
 void ContactManager::writeContactsToFile() {
-    std::ofstream fhand("../data/contacts.csv");
+    std::ofstream fhand("data/contacts.csv");
 
     std::string line;
     for (const auto& contact : contactList) {
